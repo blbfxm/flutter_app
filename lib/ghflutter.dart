@@ -1,8 +1,7 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'strings.dart';
-import 'package:http/http.dart' as http;
-import 'member.dart';
+import './class/getdata.dart';
 
 class GHFlutter extends StatefulWidget {
   @override
@@ -12,16 +11,10 @@ class GHFlutter extends StatefulWidget {
 class GHFlutterState extends State<GHFlutter> {
   var _member = [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
-
   _loadData() async {
-    String dataURL = "https://api.github.com/orgs/raywenderlich/members";
-    http.Response response = await http.get(dataURL);
+    Response response = await new GetData().loadData();
     setState(() {
-      final membersJSON = JSON.decode(response.body);
-      for(var memberJSON in membersJSON){
-        final member=new Member(memberJSON["login"], memberJSON["avatar_url"]);
-        _member.add(member);
-      }
+      _member = response.data;
     });
   }
 
@@ -39,7 +32,7 @@ class GHFlutterState extends State<GHFlutter> {
               return new Divider();
             }
             var index = position ~/ 2;
-            return _buildRow(position);
+            return _buildRow(index);
           },
         ));
   }
@@ -53,16 +46,13 @@ class GHFlutterState extends State<GHFlutter> {
 
   Widget _buildRow(int i) {
     return new Padding(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.all(12.0),
         child: new ListTile(
-          title: new Text("${_member[i].login}", style: _biggerFont),
+          title: new Text("${_member[i]["login"]}", style: _biggerFont),
           leading: new CircleAvatar(
             backgroundColor: Colors.green,
-            backgroundImage: new NetworkImage(_member[i].avatarUrl),
+            backgroundImage: new NetworkImage("${_member[i]["avatar_url"]}"),
           ),
         ));
-    /* return new ListTile(
-      title: new Text("${_member[i]["login"]}",style: _biggerFont,)
-    );*/
   }
 }
